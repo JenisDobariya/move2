@@ -77,11 +77,20 @@
                     <label class="form-label">License Key</label>
 
                     <div class="d-flex gap-2">
+                        <!-- License Key Field -->
                         <input type="text" name="lic_key" id="lic_key" class="form-control" readonly
                             placeholder="Click Generate">
+
+                        <!-- Generate Button -->
                         <button type="button" class="btn btn-outline-primary" id="genBtn" onclick="generateLicKey()">
                             <span id="btnText">Generate</span>
                             <span id="btnSpinner" class="spinner-border spinner-border-sm d-none"></span>
+                        </button>
+
+                        <!-- Copy Button -->
+                        <button type="button" class="btn btn-outline-success" id="copyBtn" onclick="copyLicKey()"
+                            disabled>
+                            Copy
                         </button>
                     </div>
 
@@ -139,17 +148,26 @@
             const btn = document.getElementById("genBtn");
             const btnText = document.getElementById("btnText");
             const spinner = document.getElementById("btnSpinner");
+            const copyBtn = document.getElementById("copyBtn");
 
             // UI → processing state
             btn.disabled = true;
             btnText.innerText = "Generating...";
             spinner.classList.remove("d-none");
+            copyBtn.disabled = true;
 
             fetch("/generate-license-key")
                 .then(response => response.json())
                 .then(data => {
+                    // if (data.lic_key) {
+                    //     document.getElementById("lic_key").value = data.lic_key;
+                    // } else {
+                    //     alert("Failed to generate license key");
+                    // }
                     if (data.lic_key) {
-                        document.getElementById("lic_key").value = data.lic_key;
+                        const licField = document.getElementById("lic_key");
+                        licField.value = data.lic_key;
+                        copyBtn.disabled = false; // enable copy button
                     } else {
                         alert("Failed to generate license key");
                     }
@@ -163,6 +181,19 @@
                     btn.disabled = false;
                     btnText.innerText = "Generate";
                     spinner.classList.add("d-none");
+                });
+        }
+        // Copy to clipboard
+        function copyLicKey() {
+            const licField = document.getElementById("lic_key");
+            if (!licField.value) return;
+
+            navigator.clipboard.writeText(licField.value)
+                .then(() => {
+                    alert("License key copied!");
+                })
+                .catch(err => {
+                    console.error("Failed to copy: ", err);
                 });
         }
     </script>
