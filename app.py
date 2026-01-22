@@ -1,14 +1,18 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import requests
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 from functools import wraps
 from flask import jsonify
 
 
 app = Flask(__name__)
-app.secret_key = "ca988e28cd228f808efa00c2586d0167f63b5b2853763b92f4a1bc9fd0683cd3"  # keep this secure
+app.secret_key = os.getenv("SECRET_KEY")  # keep this secure
 
-FIREBASE_API_KEY = "AIzaSyBBI4af3jz-6Jx-CENqWPmhFAAhQM60PNw"
-FIREBASE_DB_URL = "https://humananalysisv0-default-rtdb.firebaseio.com/.json"
+FIREBASE_API_KEY = os.getenv("FIREBASE_API_KEY")
+FIREBASE_DB_URL = os.getenv("FIREBASE_DB_URL")
 
 # ----------------------
 # Login Required Decorator
@@ -132,4 +136,3 @@ def logout():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
