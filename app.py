@@ -11,7 +11,7 @@ from flask import jsonify
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")  # keep this secure
 
-FIREBASE_API_KEY = os.getenv("FIREBASE_API_KEY")
+FIREBASE_API_KEY = os.getenv("FIREBASE_API_KEY") #firebase
 FIREBASE_DB_URL = os.getenv("FIREBASE_DB_URL")
 
 # ----------------------
