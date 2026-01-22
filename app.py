@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import requests
 import os
 from dotenv import load_dotenv
+import random
 
 load_dotenv()
 from functools import wraps
@@ -11,7 +12,7 @@ from flask import jsonify
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")  # keep this secure
 
-FIREBASE_API_KEY = os.getenv("FIREBASE_API_KEY") #firebase
+FIREBASE_API_KEY = os.getenv("FIREBASE_API_KEY")
 FIREBASE_DB_URL = os.getenv("FIREBASE_DB_URL")
 
 # ----------------------
@@ -123,6 +124,24 @@ def add_event():
 
     return render_template("add_event.html")
 
+
+@app.route("/generate-license-key")
+@login_required
+def generate_license_key():
+    token = session.get("token")
+
+    while True:
+        # Generate 6-digit unique key
+        lic_key = random.randint(10000, 999999999)
+
+        # Check if key exists in Firebase
+        check_url = f"https://humananalysisv0-default-rtdb.firebaseio.com/Events/{lic_key}.json"
+        response = requests.get(check_url, params={"auth": token})
+
+        if response.json() is None:
+            return jsonify({"lic_key": lic_key})
+
+
 # ----------------------
 # Logout
 # ----------------------
@@ -130,7 +149,6 @@ def add_event():
 def logout():
     session.clear()
     return redirect(url_for("login"))
-
 
 
 

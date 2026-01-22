@@ -71,12 +71,25 @@
                 </div>
 
                 <!-- License Key -->
+
+                <!-- License Key -->
                 <div class="mb-4">
                     <label class="form-label">License Key</label>
-                    <input type="number" name="lic_key" id="lic_key" class="form-control"
-                        placeholder="Unique License Key">
+
+                    <div class="d-flex gap-2">
+                        <input type="text" name="lic_key" id="lic_key" class="form-control" readonly
+                            placeholder="Click Generate">
+                        <button type="button" class="btn btn-outline-primary" id="genBtn" onclick="generateLicKey()">
+                            <span id="btnText">Generate</span>
+                            <span id="btnSpinner" class="spinner-border spinner-border-sm d-none"></span>
+                        </button>
+                    </div>
+
                     <div class="error-text" id="licKeyError"></div>
                 </div>
+
+
+
 
                 <!-- Submit -->
                 <button class="btn btn-primary w-100">
@@ -120,6 +133,37 @@
             }
 
             return valid;
+        }
+
+        function generateLicKey() {
+            const btn = document.getElementById("genBtn");
+            const btnText = document.getElementById("btnText");
+            const spinner = document.getElementById("btnSpinner");
+
+            // UI → processing state
+            btn.disabled = true;
+            btnText.innerText = "Generating...";
+            spinner.classList.remove("d-none");
+
+            fetch("/generate-license-key")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.lic_key) {
+                        document.getElementById("lic_key").value = data.lic_key;
+                    } else {
+                        alert("Failed to generate license key");
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Error generating license key");
+                })
+                .finally(() => {
+                    // UI → normal state
+                    btn.disabled = false;
+                    btnText.innerText = "Generate";
+                    spinner.classList.add("d-none");
+                });
         }
     </script>
 
