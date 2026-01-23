@@ -57,9 +57,9 @@ def login():
 
     return render_template("login.html", error=error)
 
-# ----------------------
+# -----------------------
 # Dashboard (Protected)
-# ----------------------
+# -----------------------
 @app.route("/dashboard")
 @login_required
 def dashboard():
