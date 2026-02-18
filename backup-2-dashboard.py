@@ -5,19 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Event Analytics Dashboard</title>
-
-    <!-- Preconnect for fast font load -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- display=swap prevents render blocking -->
     <link
         href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap"
         rel="stylesheet">
-
-    <!-- Scripts deferred — never block HTML paint -->
-    <script defer src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 
     <style>
         :root {
@@ -32,11 +26,10 @@
             --text: #e2eaf8;
             --text-muted: #8aafd4;
             --glow: 0 0 20px rgba(0, 212, 255, 0.25);
+            --glow2: 0 0 20px rgba(124, 58, 237, 0.25);
         }
 
-        *,
-        *::before,
-        *::after {
+        * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
@@ -50,6 +43,7 @@
             overflow-x: hidden;
         }
 
+        /* Animated grid background */
         body::before {
             content: '';
             position: fixed;
@@ -62,6 +56,7 @@
             z-index: 0;
         }
 
+        /* Floating orbs */
         body::after {
             content: '';
             position: fixed;
@@ -90,7 +85,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(5, 10, 20, 0.9);
+            background: rgba(5, 10, 20, 0.85);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
             padding: 0 2rem;
@@ -171,6 +166,7 @@
             color: #fff;
         }
 
+        /* MAIN */
         .container {
             max-width: 1400px;
             margin: 0 auto;
@@ -179,100 +175,7 @@
             z-index: 1;
         }
 
-        /* ── SKELETON LOADER ── */
-        .skeleton {
-            background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.4s infinite;
-            border-radius: 8px;
-        }
-
-        @keyframes shimmer {
-            0% {
-                background-position: 200% 0;
-            }
-
-            100% {
-                background-position: -200% 0;
-            }
-        }
-
-        #skeletonView {
-            display: block;
-        }
-
-        #mainContent {
-            display: none;
-        }
-
-        .skel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .skel-title {
-            height: 40px;
-            width: 280px;
-        }
-
-        .skel-badge {
-            height: 32px;
-            width: 160px;
-            border-radius: 100px;
-        }
-
-        .skel-selector {
-            height: 60px;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
-        }
-
-        .skel-meta {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .skel-meta-card {
-            height: 72px;
-            border-radius: 10px;
-        }
-
-        .skel-kpi {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .skel-kpi-card {
-            height: 90px;
-            border-radius: 12px;
-        }
-
-        .skel-charts {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .skel-chart-card {
-            height: 300px;
-            border-radius: 12px;
-        }
-
-        .skel-line {
-            height: 420px;
-            border-radius: 12px;
-        }
-
-        /* PAGE HEADER */
+        /* HEADER */
         .page-header {
             margin-bottom: 2rem;
             display: flex;
@@ -357,7 +260,7 @@
             border-color: var(--accent);
         }
 
-        /* META STRIP */
+        /* META INFO STRIP */
         .meta-strip {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -528,6 +431,7 @@
             padding: 1.2rem;
         }
 
+        /* ZOOM CONTROLS */
         .zoom-controls {
             display: flex;
             gap: 6px;
@@ -554,13 +458,19 @@
             border-color: var(--accent);
         }
 
-        /* LINE CHART */
+        /* LINE CHART FULL WIDTH */
         .line-card {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 12px;
             overflow: hidden;
             margin-bottom: 2rem;
+        }
+
+        .line-card .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .hint-text {
@@ -570,6 +480,7 @@
             letter-spacing: 0.08em;
         }
 
+        /* SCROLL WRAPPER */
         .scroll-wrapper {
             position: relative;
             overflow: hidden;
@@ -600,6 +511,7 @@
         .chart-scroll-container::-webkit-scrollbar-thumb {
             background: var(--accent);
             border-radius: 10px;
+            opacity: 0.5;
         }
 
         #chartArea {
@@ -607,6 +519,7 @@
             min-width: 100%;
         }
 
+        /* Scroll fade edges */
         .scroll-wrapper::before,
         .scroll-wrapper::after {
             content: '';
@@ -628,6 +541,7 @@
             background: linear-gradient(-90deg, var(--surface), transparent);
         }
 
+        /* Scroll bottom bar */
         .scroll-bar {
             padding: 0.8rem 1.2rem 1rem;
             display: flex;
@@ -657,7 +571,7 @@
             color: var(--accent);
         }
 
-        /* EMOTION LIST */
+        /* Emotion top list */
         .emotion-list {
             display: flex;
             flex-direction: column;
@@ -699,23 +613,6 @@
             text-align: right;
         }
 
-        /* FADE IN */
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(16px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        #mainContent {
-            animation: fadeUp 0.4s ease both;
-        }
-
         /* RESPONSIVE */
         @media (max-width: 900px) {
             .charts-grid {
@@ -729,45 +626,27 @@
             .kpi-row {
                 grid-template-columns: 1fr;
             }
+        }
 
-            .skel-meta {
-                grid-template-columns: repeat(2, 1fr);
+        /* FADE IN ANIMATION */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
             }
 
-            .skel-kpi {
-                grid-template-columns: 1fr;
-            }
-
-            .skel-charts {
-                grid-template-columns: 1fr;
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
-        @media (max-width: 480px) {
-            .container {
-                padding: 1rem;
-            }
-
-            nav {
-                padding: 0 1rem;
-            }
-
-            .welcome-text {
-                font-size: 1.4rem;
-            }
-
-            .nav-brand {
-                font-size: 0.85rem;
-            }
-
-            .meta-strip {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .scroll-nav button {
-                padding: 5px 8px;
-                font-size: 0.6rem;
-            }
+        .chart-card,
+        .kpi-card,
+        .meta-card,
+        .line-card,
+        .event-selector {
+            animation: fadeUp 0.5s ease both;
         }
     </style>
 </head>
@@ -789,185 +668,184 @@
 
     <div class="container">
 
-        <!-- SKELETON — shown instantly, no JS needed -->
-        <div id="skeletonView">
-            <div class="skel-header">
-                <div class="skeleton skel-title"></div>
-                <div class="skeleton skel-badge"></div>
+        <div class="page-header">
+            <div class="welcome-text">Welcome, <span id="userDisplay">{{ user }}</span></div>
+            <div class="live-badge">
+                <div class="live-dot"></div>
+                LIVE · AUTO-REFRESH 5s
             </div>
-            <div class="skeleton skel-selector"></div>
-            <div class="skel-meta">
-                <div class="skeleton skel-meta-card"></div>
-                <div class="skeleton skel-meta-card"></div>
-                <div class="skeleton skel-meta-card"></div>
-                <div class="skeleton skel-meta-card"></div>
-            </div>
-            <div class="skel-kpi">
-                <div class="skeleton skel-kpi-card"></div>
-                <div class="skeleton skel-kpi-card"></div>
-                <div class="skeleton skel-kpi-card"></div>
-            </div>
-            <div class="skel-charts">
-                <div class="skeleton skel-chart-card"></div>
-                <div class="skeleton skel-chart-card"></div>
-            </div>
-            <div class="skeleton skel-line"></div>
         </div>
 
-        <!-- REAL CONTENT — revealed after first data load -->
-        <div id="mainContent">
+        <!-- Event Selector -->
+        <div class="event-selector">
+            <span class="selector-label">Active Event</span>
+            <select id="eventFilter"></select>
+        </div>
 
-            <div class="page-header">
-                <div class="welcome-text">Welcome, <span id="userDisplay">{{ user }}</span></div>
-                <div class="live-badge">
-                    <div class="live-dot"></div>LIVE · AUTO-REFRESH 5s
+        <!-- Meta Strip -->
+        <div class="meta-strip">
+            <div class="meta-card">
+                <div class="meta-label">Date</div>
+                <div class="meta-value" id="eventDate">—</div>
+            </div>
+            <div class="meta-card">
+                <div class="meta-label">Time Range</div>
+                <div class="meta-value" id="eventTimeRange">—</div>
+            </div>
+            <div class="meta-card">
+                <div class="meta-label">License Key</div>
+                <div class="meta-value" id="eventLicKey" style="font-family:'Space Mono',monospace;font-size:0.75rem;">—
                 </div>
             </div>
-
-            <div class="event-selector">
-                <span class="selector-label">Active Event</span>
-                <select id="eventFilter"></select>
+            <div class="meta-card">
+                <div class="meta-label">Handler</div>
+                <div class="meta-value" id="eventHandler">—</div>
             </div>
+        </div>
 
-            <div class="meta-strip">
-                <div class="meta-card">
-                    <div class="meta-label">Date</div>
-                    <div class="meta-value" id="eventDate">—</div>
-                </div>
-                <div class="meta-card">
-                    <div class="meta-label">Time Range</div>
-                    <div class="meta-value" id="eventTimeRange">—</div>
-                </div>
-                <div class="meta-card">
-                    <div class="meta-label">License Key</div>
-                    <div class="meta-value" id="eventLicKey"
-                        style="font-family:'Space Mono',monospace;font-size:0.75rem;">—</div>
-                </div>
-                <div class="meta-card">
-                    <div class="meta-label">Handler</div>
-                    <div class="meta-value" id="eventHandler">—</div>
-                </div>
+        <!-- KPI Row -->
+        <div class="kpi-row">
+            <div class="kpi-card">
+                <div class="kpi-label">Total Entries</div>
+                <div class="kpi-value" id="kpiTotal">0</div>
             </div>
-
-            <div class="kpi-row">
-                <div class="kpi-card">
-                    <div class="kpi-label">Total Entries</div>
-                    <div class="kpi-value" id="kpiTotal">0</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-label">Emotion Types</div>
-                    <div class="kpi-value" id="kpiEmotions">0</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-label">Top Emotion</div>
-                    <div class="kpi-value" id="kpiTop" style="font-size:1.4rem;">—</div>
-                </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Emotion Types</div>
+                <div class="kpi-value" id="kpiEmotions">0</div>
             </div>
-
-            <div class="charts-grid">
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <span class="chart-title">Emotion Distribution</span>
-                        <div style="display:flex;align-items:center;gap:10px;">
-                            <span class="chart-tag">BAR</span>
-                            <div class="zoom-controls">
-                                <button class="zoom-btn" onclick="zoomChart(barChart,'in')">+</button>
-                                <button class="zoom-btn" onclick="zoomChart(barChart,'out')">−</button>
-                                <button class="zoom-btn" onclick="resetChart(barChart)">⟳</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="chart-body"><canvas id="barChart" height="220"></canvas></div>
-                </div>
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <span class="chart-title">Emotion Breakdown</span>
-                        <span class="chart-tag">PIE</span>
-                    </div>
-                    <div class="chart-body">
-                        <div style="display:flex;gap:1.5rem;align-items:flex-start;">
-                            <div style="flex:1;max-width:200px;"><canvas id="pieChart"></canvas></div>
-                            <div class="emotion-list" id="emotionList" style="flex:1;margin-top:8px;"></div>
-                        </div>
-                    </div>
-                </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Top Emotion</div>
+                <div class="kpi-value" id="kpiTop" style="font-size:1.4rem;">—</div>
             </div>
+        </div>
 
-            <div class="line-card">
+        <!-- Bar + Pie -->
+        <div class="charts-grid">
+            <div class="chart-card">
                 <div class="chart-header">
-                    <div>
-                        <span class="chart-title">Emotion Frequency Trends</span>
-                        <div class="hint-text" style="margin-top:4px;">SCROLL → drag · ZOOM → wheel/pinch · RESET →
-                            double-click</div>
-                    </div>
+                    <span class="chart-title">Emotion Distribution</span>
                     <div style="display:flex;align-items:center;gap:10px;">
-                        <span class="chart-tag">TIMELINE</span>
+                        <span class="chart-tag">BAR</span>
                         <div class="zoom-controls">
-                            <button class="zoom-btn" onclick="zoomChart(lineChart,'in')">+</button>
-                            <button class="zoom-btn" onclick="zoomChart(lineChart,'out')">−</button>
-                            <button class="zoom-btn" onclick="resetChart(lineChart)">⟳</button>
+                            <button class="zoom-btn" onclick="zoomChart(barChart,'in')">+</button>
+                            <button class="zoom-btn" onclick="zoomChart(barChart,'out')">−</button>
+                            <button class="zoom-btn" onclick="resetChart(barChart)" title="Reset">⟳</button>
                         </div>
                     </div>
                 </div>
-                <div class="scroll-wrapper">
-                    <div class="chart-scroll-container" id="scrollContainer">
-                        <div id="chartArea"><canvas id="lineChart"></canvas></div>
-                    </div>
-                </div>
-                <div class="scroll-bar">
-                    <div class="scroll-nav">
-                        <button onclick="scrollChart(-300)">← PREV</button>
-                        <button onclick="scrollChart(300)">NEXT →</button>
-                        <button onclick="scrollToEnd()">END ↦</button>
-                    </div>
-                    <div class="hint-text">DRAG TO SCROLL</div>
+                <div class="chart-body">
+                    <canvas id="barChart" height="220"></canvas>
                 </div>
             </div>
-
+            <div class="chart-card">
+                <div class="chart-header">
+                    <span class="chart-title">Emotion Breakdown</span>
+                    <span class="chart-tag">PIE</span>
+                </div>
+                <div class="chart-body">
+                    <div style="display:flex;gap:1.5rem;align-items:flex-start;">
+                        <div style="flex:1;max-width:200px;">
+                            <canvas id="pieChart"></canvas>
+                        </div>
+                        <div class="emotion-list" id="emotionList" style="flex:1;margin-top:8px;"></div>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <!-- Line Chart -->
+        <div class="line-card">
+            <div class="chart-header">
+                <div>
+                    <span class="chart-title">Emotion Frequency Trends</span>
+                    <div class="hint-text" style="margin-top:4px;">SCROLL → drag · ZOOM → pinch / wheel · RESET →
+                        double-click</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span class="chart-tag">TIMELINE</span>
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" onclick="zoomChart(lineChart,'in')">+</button>
+                        <button class="zoom-btn" onclick="zoomChart(lineChart,'out')">−</button>
+                        <button class="zoom-btn" onclick="resetChart(lineChart)">⟳</button>
+                    </div>
+                </div>
+            </div>
+            <div class="scroll-wrapper">
+                <div class="chart-scroll-container" id="scrollContainer">
+                    <div id="chartArea">
+                        <canvas id="lineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="scroll-bar">
+                <div class="scroll-nav">
+                    <button onclick="scrollChart(-300)">← PREV</button>
+                    <button onclick="scrollChart(300)">NEXT →</button>
+                    <button onclick="scrollToEnd()">END ↦</button>
+                </div>
+                <div class="hint-text">DRAG TO SCROLL</div>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        window.addEventListener('load', initApp);
-
         let barChart, pieChart, lineChart;
         let eventMap = {};
-        let analyticsCache = {};  // Cache per licKey so switching is instant
-        let lastDataHash = '';
-        let lastEmotionSet = '';
-        let chartsReady = false;
-        let firstLoad = true;
+        let currentDataLength = 0;
 
-        const PALETTE = ['#00d4ff', '#7c3aed', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#a78bfa'];
+        const PALETTE = [
+            '#00d4ff', '#7c3aed', '#10b981', '#f59e0b',
+            '#ef4444', '#ec4899', '#14b8a6', '#a78bfa'
+        ];
 
-        /* ── Drag-to-scroll ── */
-        function initDrag() {
-            const sc = document.getElementById('scrollContainer');
-            let dragging = false, startX, sl;
-            sc.addEventListener('mousedown', e => { dragging = true; startX = e.pageX - sc.offsetLeft; sl = sc.scrollLeft; });
-            sc.addEventListener('mouseleave', () => dragging = false);
-            sc.addEventListener('mouseup', () => dragging = false);
-            sc.addEventListener('mousemove', e => {
-                if (!dragging) return;
-                e.preventDefault();
-                sc.scrollLeft = sl - (e.pageX - sc.offsetLeft - startX) * 1.5;
-            });
+        /* ---- Drag-to-scroll ---- */
+        const scrollContainer = document.getElementById('scrollContainer');
+        let isDragging = false, startX, scrollLeft;
+
+        scrollContainer.addEventListener('mousedown', e => {
+            isDragging = true;
+            startX = e.pageX - scrollContainer.offsetLeft;
+            scrollLeft = scrollContainer.scrollLeft;
+        });
+        scrollContainer.addEventListener('mouseleave', () => isDragging = false);
+        scrollContainer.addEventListener('mouseup', () => isDragging = false);
+        scrollContainer.addEventListener('mousemove', e => {
+            if (!isDragging) return;
+            e.preventDefault();
+            const x = e.pageX - scrollContainer.offsetLeft;
+            scrollContainer.scrollLeft = scrollLeft - (x - startX) * 1.5;
+        });
+
+        /* ---- Scroll helpers ---- */
+        function scrollChart(px) {
+            scrollContainer.scrollBy({ left: px, behavior: 'smooth' });
+        }
+        function scrollToEnd() {
+            scrollContainer.scrollTo({ left: scrollContainer.scrollWidth, behavior: 'smooth' });
         }
 
-        function scrollChart(px) { document.getElementById('scrollContainer').scrollBy({ left: px, behavior: 'smooth' }); }
-        function scrollToEnd() { const sc = document.getElementById('scrollContainer'); sc.scrollTo({ left: sc.scrollWidth, behavior: 'smooth' }); }
-        function zoomChart(c, d) { if (c) d === 'in' ? c.zoom(1.3) : c.zoom(0.7); }
-        function resetChart(c) { if (c) c.resetZoom(); }
+        /* ---- Zoom helpers ---- */
+        function zoomChart(chart, dir) {
+            if (!chart) return;
+            if (dir === 'in') chart.zoom(1.3);
+            else chart.zoom(0.7);
+        }
+        function resetChart(chart) {
+            if (!chart) return;
+            chart.resetZoom();
+        }
 
-        /* ── Fetch ── */
+        /* ---- Fetch ---- */
         async function fetchData() {
             const res = await fetch('/api/data');
-            return res.json();
+            return await res.json();
         }
 
-        /* ── Analytics ── */
+        /* ---- Analytics ---- */
         function getAnalytics(eventData) {
-            const emotionCount = {}, timeGroups = {};
+            const emotionCount = {};
+            const timeGroups = {};
             if (!eventData?.data) return { emotionCount, timeGroups, total: 0 };
 
             const entries = Object.values(eventData.data)
@@ -981,59 +859,106 @@
                 .filter(Boolean)
                 .sort((a, b) => a.timestamp - b.timestamp);
 
-            entries.forEach(e => {
-                emotionCount[e.emotion] = (emotionCount[e.emotion] || 0) + 1;
-                if (!timeGroups[e.timestamp]) timeGroups[e.timestamp] = {};
-                timeGroups[e.timestamp][e.emotion] = (timeGroups[e.timestamp][e.emotion] || 0) + 1;
+            entries.forEach(entry => {
+                emotionCount[entry.emotion] = (emotionCount[entry.emotion] || 0) + 1;
+                if (!timeGroups[entry.timestamp]) timeGroups[entry.timestamp] = {};
+                timeGroups[entry.timestamp][entry.emotion] =
+                    (timeGroups[entry.timestamp][entry.emotion] || 0) + 1;
             });
 
             return { emotionCount, timeGroups, total: entries.length };
         }
 
-        /* ── Build charts (first time) ── */
+        /* ---- Chart init ---- */
         function initCharts(labels, values, timeGroups) {
-            barChart = new Chart(document.getElementById('barChart'), {
+            const barCtx = document.getElementById('barChart');
+            const pieCtx = document.getElementById('pieChart');
+            const lineCtx = document.getElementById('lineChart');
+
+            barChart = new Chart(barCtx, {
                 type: 'bar',
                 data: {
-                    labels, datasets: [{
-                        label: 'Occurrences', data: values,
-                        backgroundColor: PALETTE.slice(0, labels.length), borderRadius: 6, borderSkipped: false
+                    labels,
+                    datasets: [{
+                        label: 'Occurrences',
+                        data: values,
+                        backgroundColor: PALETTE.slice(0, labels.length),
+                        borderRadius: 6,
+                        borderSkipped: false
                     }]
                 },
                 options: {
                     responsive: true,
                     plugins: {
                         legend: { display: false },
-                        zoom: { zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'xy' }, pan: { enabled: true, mode: 'xy' } }
+                        zoom: {
+                            zoom: {
+                                wheel: { enabled: true },
+                                pinch: { enabled: true },
+                                mode: 'xy'
+                            },
+                            pan: { enabled: true, mode: 'xy' }
+                        }
                     },
                     scales: {
-                        x: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#c8d8f0', font: { family: 'Space Mono', size: 10 } } },
-                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#c8d8f0', font: { family: 'Space Mono', size: 10 }, stepSize: 1 } }
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            ticks: { color: '#c8d8f0', font: { family: 'Space Mono', size: 10 } }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            ticks: { color: '#c8d8f0', font: { family: 'Space Mono', size: 10 }, stepSize: 1 }
+                        }
                     }
                 }
             });
 
-            pieChart = new Chart(document.getElementById('pieChart'), {
+            pieChart = new Chart(pieCtx, {
                 type: 'doughnut',
-                data: { labels, datasets: [{ data: values, backgroundColor: PALETTE.slice(0, labels.length), borderWidth: 2, borderColor: '#0d1626', hoverOffset: 8 }] },
-                options: { responsive: true, cutout: '70%', plugins: { legend: { display: false } } }
+                data: {
+                    labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: PALETTE.slice(0, labels.length),
+                        borderWidth: 2,
+                        borderColor: '#0d1626',
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    cutout: '70%',
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
             });
 
-            buildLineChart(timeGroups);
-            chartsReady = true;
+            createLineChart(timeGroups);
         }
 
-        function buildLineChart(timeGroups) {
-            const sc = document.getElementById('scrollContainer');
+        function createLineChart(timeGroups) {
+            const lineCtx = document.getElementById('lineChart');
             const timeKeys = Object.keys(timeGroups);
+
             const formattedLabels = timeKeys.map(t =>
-                new Date(Number(t)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
+                new Date(Number(t)).toLocaleTimeString([], {
+                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+                })
             );
-            const emotions = [...new Set(Object.values(timeGroups).flatMap(o => Object.keys(o)))];
-            const width = Math.max(sc.clientWidth, Math.min(timeKeys.length * 45, 5000));
+
+            const emotions = [...new Set(
+                Object.values(timeGroups).flatMap(obj => Object.keys(obj))
+            )];
+
+            const width = Math.max(
+                scrollContainer.clientWidth,
+                Math.min(timeKeys.length * 45, 5000)
+            );
             document.getElementById('chartArea').style.width = width + 'px';
 
-            lineChart = new Chart(document.getElementById('lineChart'), {
+            lineChart = new Chart(lineCtx, {
                 type: 'line',
                 data: {
                     labels: formattedLabels,
@@ -1042,84 +967,119 @@
                         data: timeKeys.map(t => timeGroups[t][emo] || 0),
                         borderColor: PALETTE[i % PALETTE.length],
                         backgroundColor: PALETTE[i % PALETTE.length] + '18',
-                        tension: 0.4, pointRadius: 4, pointHoverRadius: 7, fill: true, borderWidth: 2
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointHoverRadius: 7,
+                        fill: true,
+                        borderWidth: 2
                     }))
                 },
                 options: {
-                    responsive: true, maintainAspectRatio: false,
+                    responsive: true,
+                    maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
                     plugins: {
-                        legend: { display: true, position: 'top', labels: { color: '#e2eaf8', font: { family: 'Space Mono', size: 10 }, boxWidth: 12, padding: 16 } },
-                        zoom: { zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }, pan: { enabled: true, mode: 'x' } }
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#e2eaf8',
+                                font: { family: 'Space Mono', size: 10 },
+                                boxWidth: 12,
+                                padding: 16
+                            }
+                        },
+                        zoom: {
+                            zoom: {
+                                wheel: { enabled: true },
+                                pinch: { enabled: true },
+                                mode: 'x'
+                            },
+                            pan: { enabled: true, mode: 'x' }
+                        }
                     },
                     scales: {
-                        x: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#c8d8f0', font: { family: 'Space Mono', size: 10 }, maxRotation: 45 } },
-                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#c8d8f0', font: { family: 'Space Mono', size: 11 }, stepSize: 1 } }
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            ticks: { color: '#c8d8f0', font: { family: 'Space Mono', size: 10 }, maxRotation: 45 }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            ticks: { color: '#c8d8f0', font: { family: 'Space Mono', size: 11 }, stepSize: 1 }
+                        }
                     }
                 }
             });
 
-            sc.scrollTo({ left: sc.scrollWidth, behavior: 'smooth' });
+            scrollContainer.scrollTo({ left: scrollContainer.scrollWidth, behavior: 'smooth' });
         }
 
-        /* ── Emotion sidebar ── */
+        /* ---- Update charts ---- */
+        function updateCharts(labels, values, timeGroups) {
+            barChart.data.labels = labels;
+            barChart.data.datasets[0].data = values;
+            barChart.data.datasets[0].backgroundColor = PALETTE.slice(0, labels.length);
+            barChart.update('none');
+
+            pieChart.data.labels = labels;
+            pieChart.data.datasets[0].data = values;
+            pieChart.data.datasets[0].backgroundColor = PALETTE.slice(0, labels.length);
+            pieChart.update('none');
+
+            lineChart.destroy();
+            createLineChart(timeGroups);
+        }
+
+        /* ---- Emotion List (sidebar) ---- */
         function renderEmotionList(emotionCount) {
+            const list = document.getElementById('emotionList');
             const max = Math.max(...Object.values(emotionCount));
-            document.getElementById('emotionList').innerHTML =
-                Object.entries(emotionCount).sort(([, a], [, b]) => b - a).map(([emo, count], i) => `
-                <div class="emotion-row">
-                    <span class="emotion-name">${emo}</span>
-                    <div class="emotion-bar-wrap">
-                        <div class="emotion-bar-fill" style="width:${Math.round(count / max * 100)}%;background:${PALETTE[i % PALETTE.length]}"></div>
-                    </div>
-                    <span class="emotion-count">${count}</span>
-                </div>`).join('');
+            list.innerHTML = '';
+            Object.entries(emotionCount)
+                .sort(([, a], [, b]) => b - a)
+                .forEach(([emo, count], i) => {
+                    const pct = Math.round((count / max) * 100);
+                    list.innerHTML += `
+                    <div class="emotion-row">
+                        <span class="emotion-name">${emo}</span>
+                        <div class="emotion-bar-wrap">
+                            <div class="emotion-bar-fill" style="width:${pct}%;background:${PALETTE[i % PALETTE.length]}"></div>
+                        </div>
+                        <span class="emotion-count">${count}</span>
+                    </div>`;
+                });
         }
 
-        /* ── Load dashboard ── */
+        /* ---- Load dashboard ---- */
         async function loadDashboard() {
-            try {
-                const firebaseData = await fetchData();
-                eventMap = firebaseData.Events || {};
+            const firebaseData = await fetchData();
+            const events = firebaseData.Events || {};
+            eventMap = events;
 
-                // Invalidate cache for events with new data
-                Object.keys(eventMap).forEach(key => {
-                    const ev = eventMap[key];
-                    const cached = analyticsCache[key];
-                    if (cached) {
-                        const currentTotal = Object.values(ev.data || {}).filter(e => e.time_stamp && e.emotion).length;
-                        if (currentTotal !== cached.total) delete analyticsCache[key];
-                    }
-                });
-
-                const filter = document.getElementById('eventFilter');
-                const prev = filter.value;
-                filter.innerHTML = '';
-                Object.entries(eventMap).forEach(([key, ev]) => {
-                    const opt = document.createElement('option');
-                    opt.value = key; opt.text = ev.event_name || key;
-                    filter.appendChild(opt);
-                });
-                filter.value = prev || Object.keys(eventMap)[0];
-
-                if (filter.value) updateDashboardForEvent(filter.value);
-
-                // Swap skeleton → real content on first successful load
-                if (firstLoad) {
-                    firstLoad = false;
-                    document.getElementById('skeletonView').style.display = 'none';
-                    document.getElementById('mainContent').style.display = 'block';
-                }
-            } catch (e) {
-                console.error('Dashboard load error:', e);
-            }
+            const filter = document.getElementById('eventFilter');
+            const prev = filter.value;
+            filter.innerHTML = '';
+            Object.entries(eventMap).forEach(([key, ev]) => {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.text = ev.event_name || key;
+                filter.appendChild(opt);
+            });
+            filter.value = prev || Object.keys(eventMap)[0];
+            if (filter.value) updateDashboardForEvent(filter.value);
         }
 
+        /* ---- Update event view ---- */
         function updateDashboardForEvent(licKey) {
             const event = eventMap[licKey];
             if (!event) return;
 
             document.getElementById('eventDate').innerText = event.event_date || '—';
+            // document.getElementById('eventTimeRange').innerText =
+            //     (event.start_time || '??') + ' → ' + (event.end_time || '??');
+
+            // 2. Update Time Range (Start - End)
             const start = event.event_start_time_ || "??:??";
             const end = event.event_end_time_to || "??:??";
             document.getElementById("eventTimeRange").innerText = `${start} to ${end}`;
@@ -1127,77 +1087,31 @@
             document.getElementById('eventLicKey').innerText = licKey;
             document.getElementById('eventHandler').innerText = event.handling_person_name || '—';
 
-            // Use cached analytics if available (instant on dropdown switch)
-            if (!analyticsCache[licKey]) {
-                analyticsCache[licKey] = getAnalytics(event);
-            }
-            const { emotionCount, timeGroups, total } = analyticsCache[licKey];
+            const { emotionCount, timeGroups, total } = getAnalytics(event);
 
-            const labels = Object.keys(emotionCount).sort((a, b) => emotionCount[b] - emotionCount[a]);
-            const values = labels.map(l => emotionCount[l]);
-            const topEmo = labels[0] || '—';
-
+            // KPIs
             document.getElementById('kpiTotal').innerText = total;
+            const labels = Object.keys(emotionCount);
             document.getElementById('kpiEmotions').innerText = labels.length;
-            document.getElementById('kpiTop').innerText = topEmo === '—' ? '—' : topEmo.charAt(0).toUpperCase() + topEmo.slice(1);
+            const topEmo = labels.sort((a, b) => emotionCount[b] - emotionCount[a])[0] || '—';
+            document.getElementById('kpiTop').innerText = topEmo.charAt(0).toUpperCase() + topEmo.slice(1);
 
+            const values = labels.map(l => emotionCount[l]);
             renderEmotionList(emotionCount);
 
-            const hash = `${labels.join()}|${values.join()}|${Object.keys(timeGroups).length}`;
-            if (hash === lastDataHash) return;
-            lastDataHash = hash;
+            if (total === currentDataLength) return;
+            currentDataLength = total;
 
-            const emotionSet = labels.join(',');
-
-            if (!chartsReady) {
-                initCharts(labels, values, timeGroups);
-            } else {
-                // Bar & Pie: always fast in-place update
-                barChart.data.labels = labels;
-                barChart.data.datasets[0].data = values;
-                barChart.data.datasets[0].backgroundColor = PALETTE.slice(0, labels.length);
-                barChart.update('none');
-
-                pieChart.data.labels = labels;
-                pieChart.data.datasets[0].data = values;
-                pieChart.data.datasets[0].backgroundColor = PALETTE.slice(0, labels.length);
-                pieChart.update('none');
-
-                // Line: only full rebuild if emotion types changed; otherwise update data in place
-                if (emotionSet !== lastEmotionSet) {
-                    lineChart.destroy();
-                    buildLineChart(timeGroups);
-                } else {
-                    const timeKeys = Object.keys(timeGroups);
-                    const formattedLabels = timeKeys.map(t =>
-                        new Date(Number(t)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
-                    );
-                    lineChart.data.labels = formattedLabels;
-                    lineChart.data.datasets.forEach((ds, i) => {
-                        const emo = labels[i];
-                        ds.data = emo ? timeKeys.map(t => timeGroups[t]?.[emo] || 0) : [];
-                    });
-                    lineChart.update('none');
-                    const sc = document.getElementById('scrollContainer');
-                    sc.scrollTo({ left: sc.scrollWidth, behavior: 'smooth' });
-                }
-            }
-
-            lastEmotionSet = emotionSet;
+            if (!barChart) initCharts(labels, values, timeGroups);
+            else updateCharts(labels, values, timeGroups);
         }
 
-        document.getElementById('eventFilter').addEventListener('change', e => {
-            lastDataHash = ''; // Force re-render for new event
-            lastEmotionSet = ''; // Force line chart rebuild for new event
-            updateDashboardForEvent(e.target.value);
-        });
+        document.getElementById('eventFilter').addEventListener('change',
+            e => updateDashboardForEvent(e.target.value));
 
-        function initApp() {
-            initDrag();
-            loadDashboard();
-            setInterval(loadDashboard, 5000);
-        }
+        loadDashboard();
+        setInterval(loadDashboard, 5000);
     </script>
 </body>
 
-</html>
+</html> 

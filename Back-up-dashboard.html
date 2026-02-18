@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Event Analytics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <nav class="navbar navbar-dark bg-dark px-3 d-flex justify-content-between">
+        <span class="navbar-brand">Event Analytics</span>
+
+        <div>
+            <a href="/add-event" class="btn btn-success me-2">
+                Add New Event
+            </a>
+            <a href="/logout" class="btn btn-danger">
+                Logout
+            </a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+
+        <h4>Welcome, {{ user }}</h4>
+
+        <!-- EVENT FILTER -->
+        <div class="row mt-3">
+            <div class="col-md-4">
+                <label>Select Event</label>
+                <select id="eventFilter" class="form-select"></select>
+            </div>
+        </div>
+
+        <div class="row mt-4 p-3 bg-light border rounded">
+            <div class="col-md-3">
+                <span class="info-label">Event Date:</span>
+                <span id="eventDate" class="info-value">—</span>
+            </div>
+            <div class="col-md-3 border-start">
+                <span class="info-label">Time:</span>
+                <span id="eventTimeRange" class="info-value">—</span>
+            </div>
+            <div class="col-md-3 border-start">
+                <span class="info-label">License Key:</span>
+                <span id="eventLicKey" class="info-value">—</span>
+            </div>
+            <div class="col-md-3 border-start">
+                <span class="info-label">Handler:</span>
+                <span id="eventHandler" class="info-value">—</span>
+            </div>
+        </div>
+
+
+        <!-- CHARTS -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <canvas id="barChart"></canvas>
+            </div>
+            <div class="col-md-6">
+                <canvas id="pieChart"></canvas>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <canvas id="lineChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let barChart, pieChart, lineChart;
+        let eventMap = {};
+        let dropdownInitialized = false;
+
+        async function fetchData() {
+            const res = await fetch("/api/data");
+            return await res.json();
+        }
+
+        function countEmotions(eventData) {
+            const emotionCount = {};
+            if (!eventData?.data) return emotionCount;
+
+            Object.values(eventData.data).forEach(entry => {
+                const emotion = entry.emotion;
+                emotionCount[emotion] = (emotionCount[emotion] || 0) + 1;
+            });
+
+            return emotionCount;
+        }
+
+        function initCharts(labels, values) {
+            barChart = new Chart(document.getElementById("barChart"), {
+                type: "bar",
+                data: { labels, datasets: [{ label: "Emotion Count", data: values }] }
+            });
+
+            pieChart = new Chart(document.getElementById("pieChart"), {
+                type: "pie",
+                data: { labels, datasets: [{ data: values }] }
+            });
+
+            lineChart = new Chart(document.getElementById("lineChart"), {
+                type: "line",
+                data: { labels, datasets: [{ label: "Trend", data: values, fill: false }] }
+            });
+        }
+
+        function updateCharts(labels, values) {
+            [barChart, pieChart, lineChart].forEach(chart => {
+                chart.data.labels = labels;
+                chart.data.datasets[0].data = values;
+                chart.update();
+            });
+        }
+
+        async function loadDashboard() {
+            const firebaseData = await fetchData();
+            const events = firebaseData.Events || {};
+            const eventFilter = document.getElementById("eventFilter");
+
+            // Build map using LIC KEY
+            eventMap = events;
+
+            // Populate dropdown once
+            if (!dropdownInitialized) {
+                eventFilter.innerHTML = "";
+
+                Object.entries(eventMap).forEach(([licKey, event]) => {
+                    const opt = document.createElement("option");
+                    opt.value = licKey;
+                    opt.text = event.event_name;
+                    eventFilter.appendChild(opt);
+                });
+
+                dropdownInitialized = true;
+            }
+
+            const selectedKey = eventFilter.value || Object.keys(eventMap)[0];
+            updateDashboardForEvent(selectedKey);
+        }
+
+        function updateDashboardForEvent(licKey) {
+            const event = eventMap[licKey];
+            if (!event) return;
+
+            // 1. Update Date
+            document.getElementById("eventDate").innerText = event.event_date || "—";
+
+            // 2. Update Time Range (Start - End)
+            const start = event.event_start_time_ || "??:??";
+            const end = event.event_end_time_to || "??:??";
+            document.getElementById("eventTimeRange").innerText = `${start} to ${end}`;
+
+            // 3. Update License Key
+            document.getElementById("eventLicKey").innerText = licKey || "—";
+
+            // 4. Update Handler
+            document.getElementById("eventHandler").innerText = event.handling_person_name || "—";
+
+            const emotionCounts = countEmotions(event);
+            const labels = Object.keys(emotionCounts);
+            const values = Object.values(emotionCounts);
+
+            if (!barChart) {
+                initCharts(labels, values);
+            } else {
+                updateCharts(labels, values);
+            }
+        }
+
+
+        document.getElementById("eventFilter").addEventListener("change", (e) => {
+            updateDashboardForEvent(e.target.value);
+        });
+
+        loadDashboard();
+        setInterval(loadDashboard, 5000);
+    </script>
+
+</body>
+
+</html>

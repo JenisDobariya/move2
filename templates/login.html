@@ -3,68 +3,303 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Animated Login Inputs</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Bootstrap --->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Lottie -->
+    <title>Login — Event Analytics Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap"
+        rel="stylesheet">
     <script src="https://unpkg.com/@lottiefiles/lottie-player"></script>
 
     <style>
+        :root {
+            --bg: #050a14;
+            --surface: #0d1626;
+            --surface2: #111e35;
+            --border: #1c2e4a;
+            --accent: #00d4ff;
+            --accent2: #7c3aed;
+            --accent3: #10b981;
+            --danger: #ef4444;
+            --text: #e2eaf8;
+            --text-muted: #8aafd4;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            height: 100vh;
-            background: #1e2a32;
+            min-height: 100vh;
+            background: var(--bg);
+            font-family: 'Syne', sans-serif;
+            color: var(--text);
             display: flex;
-            justify-content: center;
             align-items: center;
-            font-family: Arial, sans-serif;
-        }
-
-        .container-box {
-            width: 85%;
-            max-width: 900px;
-            height: 70%;
-            background: #9b9bff;
-            display: flex;
-            border-radius: 15px;
+            justify-content: center;
+            padding: 1.5rem;
+            position: relative;
             overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
         }
 
-        .animation-box {
-            flex: 1;
+        /* Grid bg */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+        }
+
+        /* Orbs */
+        .orb1,
+        .orb2 {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .orb1 {
+            top: -200px;
+            right: -200px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(124, 58, 237, 0.1) 0%, transparent 70%);
+        }
+
+        .orb2 {
+            bottom: -150px;
+            left: -150px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.08) 0%, transparent 70%);
+        }
+
+        /* CARD */
+        .login-card {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 900px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
+            animation: fadeUp 0.6s ease both;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* LEFT PANEL */
+        .left-panel {
+            background: linear-gradient(135deg, #07111f 0%, #0f1e38 100%);
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
+            padding: 3rem 2rem;
+            position: relative;
+            border-right: 1px solid var(--border);
         }
 
-        .login-box {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 40px;
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0, 212, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.04) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        .brand-logo {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .brand-dot {
+            width: 12px;
+            height: 12px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 12px var(--accent);
+            margin: 0 auto 1rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(0.75);
+            }
+        }
+
+        .brand-name {
+            font-size: 1rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            color: var(--text);
+        }
+
+        .brand-sub {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            letter-spacing: 0.15em;
+            margin-top: 4px;
+        }
+
+        .lottie-wrap {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* RIGHT PANEL */
+        .right-panel {
+            padding: 3rem 2.5rem;
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
 
-        /* 🔥 INPUT ANIMATION */
+        .panel-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .panel-title span {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .panel-sub {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            margin-bottom: 2rem;
+        }
+
+        /* ALERT */
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 1.2rem;
+        }
+
+        /* FORM GROUP */
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-label {
+            display: block;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
         .form-control {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 11px 14px;
+            border-radius: 8px;
+            font-family: 'Syne', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
         }
 
         .form-control:focus {
-            transform: scale(1.07);
-            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.35);
-            border-color: #6c63ff;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.12);
+            transform: scale(1.02);
         }
 
-        /* MOBILE */
-        @media (max-width: 768px) {
-            .container-box {
-                flex-direction: column;
-                height: auto;
+        /* BUTTON */
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--accent), #0096cc);
+            color: #000;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-submit:hover {
+            box-shadow: 0 0 24px rgba(0, 212, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 680px) {
+            .login-card {
+                grid-template-columns: 1fr;
+            }
+
+            .left-panel {
+                padding: 2rem 1.5rem 1.5rem;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .right-panel {
+                padding: 2rem 1.5rem;
             }
         }
     </style>
@@ -72,35 +307,46 @@
 
 <body>
 
-    <div class="container-box">
+    <div class="orb1"></div>
+    <div class="orb2"></div>
 
-        <!-- Animation Section -->
-        <div class="animation-box">
-            <lottie-player src="https://assets2.lottiefiles.com/packages/lf20_kkflmtur.json" background="transparent"
-                speed="1" style="width: 280px; height: 280px;" loop autoplay>
-            </lottie-player>
+    <div class="login-card">
+
+        <!-- LEFT: Animation -->
+        <div class="left-panel">
+            <div class="lottie-wrap">
+                <lottie-player src="https://assets2.lottiefiles.com/packages/lf20_kkflmtur.json"
+                    background="transparent" speed="1" style="width:240px;height:240px;" loop autoplay>
+                </lottie-player>
+            </div>
+            <div class="brand-logo">
+                <div class="brand-dot"></div>
+                <div class="brand-name">EVENT ANALYTICS PRO</div>
+                <div class="brand-sub">REAL-TIME EMOTION INTELLIGENCE</div>
+            </div>
         </div>
 
-        <!-- Login Section -->
-        <div class="login-box">
-            <h3 class="text-center mb-3">Login</h3>
+        <!-- RIGHT: Form -->
+        <div class="right-panel">
+            <div class="panel-title">Welcome <span>Back</span></div>
+            <div class="panel-sub">SIGN IN TO YOUR DASHBOARD</div>
 
             {% if error %}
-            <div class="alert alert-danger">{{ error }}</div>
+            <div class="alert-danger">{{ error }}</div>
             {% endif %}
 
             <form method="POST">
-                <div class="mb-3">
-                    <label>Email</label>
-                    <input type="email" name="email" class="form-control" required>
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" name="email" class="form-control" placeholder="you@example.com" required>
                 </div>
 
-                <div class="mb-3">
-                    <label>Password</label>
-                    <input type="password" name="password" class="form-control" required>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" placeholder="••••••••" required>
                 </div>
 
-                <button class="btn btn-primary w-100 mt-2">Login</button>
+                <button type="submit" class="btn-submit">LOGIN →</button>
             </form>
         </div>
 

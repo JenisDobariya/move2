@@ -8,7 +8,6 @@ load_dotenv()
 from functools import wraps
 from flask import jsonify
 
-
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")  # keep this securee
 
